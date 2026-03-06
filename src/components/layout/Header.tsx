@@ -19,6 +19,7 @@ export function Header() {
   const [isScrolled, setIsScrolled] = React.useState(false);
   const { locale, setLocale, t, localeConfig } = useLocale();
   const { resolvedTheme, setTheme } = useTheme();
+  const { user } = useAuth();
   const location = useLocation();
 
   React.useEffect(() => {
@@ -137,9 +138,15 @@ export function Header() {
             </Button>
 
             {/* Dashboard Link */}
-            <Button variant="default" size="sm" asChild className="hidden md:flex">
-              <Link to="/dashboard">{t('nav.dashboard')}</Link>
-            </Button>
+            {user ? (
+              <Button variant="default" size="sm" asChild className="hidden md:flex">
+                <Link to="/dashboard">{t('nav.dashboard')}</Link>
+              </Button>
+            ) : (
+              <Button variant="default" size="sm" asChild className="hidden md:flex">
+                <Link to="/login"><LogIn className="h-4 w-4 mr-1" />{t('nav.login')}</Link>
+              </Button>
+            )}
 
             {/* Mobile Menu Toggle */}
             <Button
@@ -179,11 +186,11 @@ export function Header() {
                   </Link>
                 ))}
                 <Link
-                  to="/dashboard"
+                  to={user ? '/dashboard' : '/login'}
                   onClick={() => setIsMenuOpen(false)}
                   className="block px-4 py-2 rounded-lg text-sm font-medium bg-primary text-primary-foreground"
                 >
-                  {t('nav.dashboard')}
+                  {user ? t('nav.dashboard') : t('nav.login')}
                 </Link>
               </div>
             </motion.div>
