@@ -7,16 +7,23 @@ import { ArticleCard } from '@/components/articles/ArticleCard';
 import { CategoryCard } from '@/components/articles/CategoryCard';
 import { Button } from '@/components/ui/button';
 import { useLocale } from '@/contexts/LocaleContext';
-import { mockArticles, mockCategories, getCategoryTranslation } from '@/lib/mockData';
+import { usePublishedArticles } from '@/hooks/useArticles';
+import { useCategories } from '@/hooks/useCategories';
+import { mapSupabaseArticle, mapSupabaseCategory, getCategoryTranslation } from '@/lib/mappers';
 
 const Categories = () => {
   const { slug } = useParams<{ slug?: string }>();
   const { t, locale } = useLocale();
+  const { data: rawCategories = [] } = useCategories();
+  const { data: rawArticles = [] } = usePublishedArticles();
+
+  const categories = rawCategories.map(mapSupabaseCategory);
+  const articles = rawArticles.map(mapSupabaseArticle);
 
   // If slug is provided, show category detail
   if (slug) {
-    const category = mockCategories.find(c => c.slug === slug);
-    
+    const category = categories.find(c => c.slug === slug);
+
     if (!category) {
       return (
         <PublicLayout>
@@ -31,7 +38,7 @@ const Categories = () => {
     }
 
     const translation = getCategoryTranslation(category, locale);
-    const categoryArticles = mockArticles.filter(a => a.categoryId === category.id);
+    const categoryArticles = articles.filter(a => a.categoryId === category.id);
 
     return (
       <PublicLayout>
@@ -111,11 +118,11 @@ const Categories = () => {
       {/* Categories Grid */}
       <section className="container-editorial py-12 md:py-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-          {mockCategories.map((category, index) => (
+          {categories.map((category, index) => (
             <CategoryCard
               key={category.id}
               category={category}
-              articleCount={mockArticles.filter(a => a.categoryId === category.id).length}
+              articleCount={articles.filter(a => a.categoryId === category.id).length}
               index={index}
             />
           ))}

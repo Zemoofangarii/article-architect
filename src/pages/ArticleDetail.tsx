@@ -13,7 +13,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useLocale } from '@/contexts/LocaleContext';
-import { mockArticles, getArticleTranslation, getCategoryTranslation } from '@/lib/mockData';
+import { useArticleBySlug, usePublishedArticles } from '@/hooks/useArticles';
+import { mapSupabaseArticle, getArticleTranslation, getCategoryTranslation } from '@/lib/mappers';
 import { formatDate } from '@/lib/helpers';
 import { toast } from 'sonner';
 
@@ -21,9 +22,22 @@ const ArticleDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const { t, locale } = useLocale();
   const [copied, setCopied] = React.useState(false);
+  const { data: rawArticle, isLoading } = useArticleBySlug(slug);
+  const { data: rawAllArticles = [] } = usePublishedArticles();
 
-  const article = mockArticles.find(a => a.slug === slug);
+  const article = rawArticle ? mapSupabaseArticle(rawArticle) : null;
+  const allArticles = rawAllArticles.map(mapSupabaseArticle);
   
+  if (isLoading) {
+    return (
+      <PublicLayout>
+        <div className="container-editorial py-32 text-center">
+          <p className="text-muted-foreground">{t('common.loading')}</p>
+        </div>
+      </PublicLayout>
+    );
+  }
+
   if (!article) {
     return (
       <PublicLayout>
@@ -38,11 +52,11 @@ const ArticleDetail = () => {
   }
 
   const translation = getArticleTranslation(article, locale);
-  const categoryTranslation = article.category 
-    ? getCategoryTranslation(article.category, locale) 
+  const categoryTranslation = article.category
+    ? getCategoryTranslation(article.category, locale)
     : null;
 
-  const relatedArticles = mockArticles
+  const relatedArticles = allArticles
     .filter(a => a.id !== article.id && a.categoryId === article.categoryId)
     .slice(0, 3);
 

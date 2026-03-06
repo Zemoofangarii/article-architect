@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Category } from '@/types';
 import { useLocale } from '@/contexts/LocaleContext';
-import { getCategoryTranslation } from '@/lib/mockData';
+import { getCategoryTranslation } from '@/lib/mappers';
 import { cn } from '@/lib/utils';
 
 interface CategoryCardProps {

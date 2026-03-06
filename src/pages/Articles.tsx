@@ -6,16 +6,22 @@ import { ArticleCard } from '@/components/articles/ArticleCard';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useLocale } from '@/contexts/LocaleContext';
-import { mockArticles, mockCategories, getCategoryTranslation } from '@/lib/mockData';
-import { cn } from '@/lib/utils';
+import { usePublishedArticles } from '@/hooks/useArticles';
+import { useCategories } from '@/hooks/useCategories';
+import { mapSupabaseArticle, mapSupabaseCategory, getCategoryTranslation } from '@/lib/mappers';
 
 const Articles = () => {
   const { t, locale } = useLocale();
+  const { data: rawArticles = [] } = usePublishedArticles();
+  const { data: rawCategories = [] } = useCategories();
   const [selectedCategory, setSelectedCategory] = React.useState<string | null>(null);
 
+  const articles = rawArticles.map(mapSupabaseArticle);
+  const categories = rawCategories.map(mapSupabaseCategory);
+
   const filteredArticles = selectedCategory
-    ? mockArticles.filter(a => a.categoryId === selectedCategory)
-    : mockArticles;
+    ? articles.filter(a => a.categoryId === selectedCategory)
+    : articles;
 
   return (
     <PublicLayout>
@@ -57,7 +63,7 @@ const Articles = () => {
               {t('categories.all')}
             </Button>
 
-            {mockCategories.map((category) => {
+            {categories.map((category) => {
               const translation = getCategoryTranslation(category, locale);
               return (
                 <Button

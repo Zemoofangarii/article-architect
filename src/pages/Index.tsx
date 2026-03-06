@@ -7,14 +7,20 @@ import { ArticleCard } from '@/components/articles/ArticleCard';
 import { CategoryCard } from '@/components/articles/CategoryCard';
 import { Button } from '@/components/ui/button';
 import { useLocale } from '@/contexts/LocaleContext';
-import { mockArticles, mockCategories } from '@/lib/mockData';
+import { usePublishedArticles } from '@/hooks/useArticles';
+import { useCategories } from '@/hooks/useCategories';
+import { mapSupabaseArticle, mapSupabaseCategory } from '@/lib/mappers';
 
 const Index = () => {
   const { t, locale } = useLocale();
-  
-  const featuredArticle = mockArticles[0];
-  const latestArticles = mockArticles.slice(1, 5);
-  const compactArticles = mockArticles.slice(2, 5);
+  const { data: rawArticles = [] } = usePublishedArticles();
+  const { data: rawCategories = [] } = useCategories();
+
+  const articles = rawArticles.map(mapSupabaseArticle);
+  const categories = rawCategories.map(mapSupabaseCategory);
+
+  const featuredArticle = articles[0];
+  const latestArticles = articles.slice(1, 5);
 
   return (
     <PublicLayout>
@@ -112,15 +118,17 @@ const Index = () => {
       </section>
 
       {/* Featured Article */}
-      <section className="container-editorial py-16 md:py-24">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <div className="w-1 h-8 bg-gradient-editorial rounded-full" />
-            <h2 className="font-serif text-2xl md:text-3xl font-bold">{t('home.featured')}</h2>
+      {featuredArticle && (
+        <section className="container-editorial py-16 md:py-24">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-1 h-8 bg-gradient-editorial rounded-full" />
+              <h2 className="font-serif text-2xl md:text-3xl font-bold">{t('home.featured')}</h2>
+            </div>
           </div>
-        </div>
-        <ArticleCard article={featuredArticle} variant="featured" />
-      </section>
+          <ArticleCard article={featuredArticle} variant="featured" />
+        </section>
+      )}
 
       {/* Latest Articles Grid */}
       <section className="container-editorial py-16 md:py-24">
@@ -161,11 +169,11 @@ const Index = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-            {mockCategories.map((category, index) => (
+            {categories.map((category, index) => (
               <CategoryCard
                 key={category.id}
                 category={category}
-                articleCount={mockArticles.filter(a => a.categoryId === category.id).length}
+                articleCount={articles.filter(a => a.categoryId === category.id).length}
                 index={index}
               />
             ))}

@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Clock } from 'lucide-react';
 import { Article } from '@/types';
 import { useLocale } from '@/contexts/LocaleContext';
-import { getArticleTranslation, getCategoryTranslation } from '@/lib/mockData';
+import { getArticleTranslation, getCategoryTranslation } from '@/lib/mappers';
 import { formatDate, cn } from '@/lib/helpers';
 import { Badge } from '@/components/ui/badge';
 

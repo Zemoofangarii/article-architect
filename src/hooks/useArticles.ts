@@ -18,7 +18,7 @@ export function usePublishedArticles() {
           *,
           article_translations(*),
           categories(*),
-          profiles!articles_author_id_fkey(*)
+          profiles!articles_author_id_profiles_fkey(*)
         `)
         .eq('status', 'published')
         .order('published_at', { ascending: false });
@@ -40,7 +40,7 @@ export function useArticleBySlug(slug: string | undefined) {
           *,
           article_translations(*),
           categories(*),
-          profiles!articles_author_id_fkey(*)
+          profiles!articles_author_id_profiles_fkey(*)
         `)
         .eq('slug', slug!)
         .single();
@@ -61,7 +61,7 @@ export function useAllArticles() {
           *,
           article_translations(*),
           categories(*),
-          profiles!articles_author_id_fkey(*)
+          profiles!articles_author_id_profiles_fkey(*)
         `)
         .order('updated_at', { ascending: false });
 
