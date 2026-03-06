@@ -1,9 +1,10 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Moon, Sun, Globe, Search } from 'lucide-react';
+import { Menu, X, Moon, Sun, Globe, Search, LogIn } from 'lucide-react';
 import { useLocale } from '@/contexts/LocaleContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -18,6 +19,7 @@ export function Header() {
   const [isScrolled, setIsScrolled] = React.useState(false);
   const { locale, setLocale, t, localeConfig } = useLocale();
   const { resolvedTheme, setTheme } = useTheme();
+  const { user } = useAuth();
   const location = useLocation();
 
   React.useEffect(() => {
@@ -136,9 +138,15 @@ export function Header() {
             </Button>
 
             {/* Dashboard Link */}
-            <Button variant="default" size="sm" asChild className="hidden md:flex">
-              <Link to="/dashboard">{t('nav.dashboard')}</Link>
-            </Button>
+            {user ? (
+              <Button variant="default" size="sm" asChild className="hidden md:flex">
+                <Link to="/dashboard">{t('nav.dashboard')}</Link>
+              </Button>
+            ) : (
+              <Button variant="default" size="sm" asChild className="hidden md:flex">
+                <Link to="/login"><LogIn className="h-4 w-4 mr-1" />{t('nav.login')}</Link>
+              </Button>
+            )}
 
             {/* Mobile Menu Toggle */}
             <Button
@@ -178,11 +186,11 @@ export function Header() {
                   </Link>
                 ))}
                 <Link
-                  to="/dashboard"
+                  to={user ? '/dashboard' : '/login'}
                   onClick={() => setIsMenuOpen(false)}
                   className="block px-4 py-2 rounded-lg text-sm font-medium bg-primary text-primary-foreground"
                 >
-                  {t('nav.dashboard')}
+                  {user ? t('nav.dashboard') : t('nav.login')}
                 </Link>
               </div>
             </motion.div>
