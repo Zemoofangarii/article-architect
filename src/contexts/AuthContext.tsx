@@ -45,6 +45,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .single();
 
     if (profileData) {
+      // Backfill display_name if missing
+      if (!profileData.display_name) {
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        const fallbackName = authUser?.user_metadata?.display_name || authUser?.email || null;
+        if (fallbackName) {
+          await supabase
+            .from('profiles')
+            .update({ display_name: fallbackName })
+            .eq('id', userId);
+          profileData.display_name = fallbackName;
+        }
+      }
       setProfile(profileData);
     }
   };
