@@ -37,7 +37,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUserRole('user');
     }
 
-    // Fetch profile
+    // Fetch profile and backfill display_name if missing
+    const { data: { user: authUser } } = await supabase.auth.getUser();
     const { data: profileData } = await supabase
       .from('profiles')
       .select('display_name, avatar_url, bio')
@@ -45,10 +46,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .single();
 
     if (profileData) {
-      // Backfill display_name if missing
-      if (!profileData.display_name) {
-        const { data: { user: authUser } } = await supabase.auth.getUser();
-        const fallbackName = authUser?.user_metadata?.display_name || authUser?.email || null;
+      if (!profileData.display_name && authUser) {
+        const fallbackName = authUser.user_metadata?.display_name || authUser.email || null;
         if (fallbackName) {
           await supabase
             .from('profiles')
@@ -58,6 +57,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
       setProfile(profileData);
+    } else if (authUser) {
+      // Profile row doesn't exist — create it
+      const displayName = authUser.user_metadata?.display_name || authUser.email || 'User';
+      await supabase
+        .from('profiles')
+        .insert({ id: userId, display_name: displayName });
+      setProfile({ display_name: displayName, avatar_url: null, bio: null });
     }
   };
 
